@@ -19,7 +19,7 @@ pipeline{
                 }
             }
 
-            stage('build docker image'){
+            stage('push docker image'){
                 steps{
                     withCredentials([string(credentialsId: 'dockerpwd', variable: 'pass')]) {
                     sh "docker login -u chethann -p ${pass}"
