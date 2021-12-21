@@ -42,7 +42,7 @@ pipeline{
                 steps{
                 script{
                     def pomfile= readMavenPom file: 'pom.xml'
-                    nexusArtifactUploader artifacts: [[artifactId: 'myweb', classifier: '', file: 'target/myweb*.war', type: 'war']], credentialsId: 'nexus', groupId: 'in.javahome', nexusUrl: '172.31.30.71:8081/', nexusVersion: 'nexus3', protocol: 'http', repository: 'my-app-release', version: '0.0.5'
+                    nexusArtifactUploader artifacts: [[artifactId: 'myweb', classifier: '', file: 'target/myweb-0.0.5.war', type: 'war']], credentialsId: 'nexus', groupId: 'in.javahome', nexusUrl: '172.31.30.71:8081/', nexusVersion: 'nexus3', protocol: 'http', repository: 'my-app-release', version: '0.0.5'
                 }
             }   
         }   
