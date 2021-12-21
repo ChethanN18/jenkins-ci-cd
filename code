@@ -1,2 +1,49 @@
+pipeline{
+    agent any
+        stages{
+            stage('git scm checkout'){
+                steps{
+                    git credentialsId: 'ChethanN18', url: 'https://github.com/ChethanN18/my-app'
+                }
+            }
 
+            stage('maven build'){
+                steps{
+                    sh 'mvn clean package'
+                }
+            }
+
+            stage('build docker image'){
+                steps{
+                    sh 'docker build -t chethann/java-1.0.0 .'
+                }
+            }
+
+            stage('build docker image'){
+                steps{
+                    withCredentials([string(credentialsId: 'dockerpwd', variable: 'pass')]) {
+                    sh "docker login -u chethann -p ${pass}"
+                }
+                    sh 'docker push chethann/java-1.0.0'
+                }
+            }
+
+            stage('upload to tomcat'){
+                steps{
+                    sshagent(['tomcat-dev']) {
+                    sh 'scp ssh -o StrictHostKeyChecking=no target/myweb-0.0.5.war ec2-user@172.31.27.96:/opt/tomcat8/webapps/'
+                    sh 'ssh ec2-user@172.31.27.96 /opt/tomcat8/bin/shutdown.sh'
+                    sh 'ssh ec2-user@172.31.27.96 /opt/tomcat8/bin/startup.sh'
+                }
+            }      
+        }
+
+        stage('upload to nexus'){
+                steps{
+                    def pomfile= readMavenPom file: 'pom.xml'
+                    nexusArtifactUploader artifacts: [[artifactId: 'myweb', classifier: '', file: 'target/myweb*.war', type: 'war']], credentialsId: 'nexus', groupId: 'in.javahome', nexusUrl: '172.31.30.71:8081/', nexusVersion: 'nexus3', protocol: 'http', repository: 'my-app-release', version: '0.0.5'
+                }
+            }   
+        }   
+    }
      
